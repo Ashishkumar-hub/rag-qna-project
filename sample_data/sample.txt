@@ -1,0 +1,1 @@
+AI (Artificial Intelligence) is the simulation of human intelligence in machines, enabling them to learn, reason, and make decisions. It powers applications like chatbots, recommendation systems, self-driving cars, and more through techniques such as machine learning and deep learning.
