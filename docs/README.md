@@ -15,7 +15,7 @@ This project is a **RAG (Retrieval-Augmented Generation) based Q&A system** that
 - **Vector Search**: FAISS
 - **Database**: PostgreSQL
 - **Embedding Models**: SentenceTransformers
-- **Testing**: Pytest, Coverage.py
+- **Testing**: Pytest
 - **Logging**: Python Logging
 - **Deployment**: Docker
 
@@ -50,7 +50,6 @@ touch configs/.env
 Add the following configurations:
 ```ini
 DATABASE_URL=postgresql://user:password@localhost:5432/rag_db
-EMBEDDING_MODEL=all-MiniLM-L6-v2
 ```
 
 ### 5️⃣ Start PostgreSQL (If not running)
@@ -80,6 +79,70 @@ Once the server is running, you can access:
 - **ReDoc UI**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)  
 
 ---
+
+## Running the Dockerized RAG Q&A Project
+
+### 1️⃣ Pull the Latest Docker Image
+
+Run the following command to pull the latest image from Docker Hub:
+
+```sh
+docker pull ashishkumar16/rag_qna_project:latest
+```
+
+### 2️⃣ Verify the Downloaded Image
+To check if the image has been successfully pulled:
+
+```sh
+docker images
+```
+
+### 3️⃣ Download the docker-compose.yml file
+Download the `docker-compose.yml` from the `/deployment` folder.
+
+### 4️⃣ Start the Containers Using Docker Compose
+Run the following command to start the FastAPI app and PostgreSQL database in detached mode:
+
+```sh
+docker-compose up -d
+```
+
+### 5️⃣ Check Running Containers
+To verify if the containers are running:
+
+```sh
+docker ps
+```
+
+### 6️⃣ View Logs of the FastAPI App
+To monitor the logs of the FastAPI application:
+
+```sh
+docker logs -f fastapi_app
+```
+
+### 7️⃣ Apply Database Migrations
+Run the Alembic migrations inside the FastAPI container:
+
+```sh
+docker exec -it fastapi_app alembic upgrade head
+```
+
+### 8️⃣ Verify Database Tables
+To check if the necessary tables exist inside PostgreSQL:
+
+```sh
+docker exec -it postgres_db psql -U postgres -d rag_db -c "\dt"
+```
+
+## ✅ Your RAG Q&A System is Now Running!
+You can now access the FastAPI application at:
+
+```
+http://localhost:8000/docs or http://0.0.0.0:8000/docs
+```
+
+This will open the Swagger API documentation, where you can test the endpoints.
 
 ## **Testing**
 Run the test suite with coverage:
