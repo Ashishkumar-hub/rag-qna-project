@@ -19,6 +19,53 @@ This project is a **RAG (Retrieval-Augmented Generation) based Q&A system** that
 - **Logging**: Python Logging
 - **Deployment**: Docker
 
+## Folder Structure
+Below is the structured layout of the project:
+
+```
+rag_qna_project/
+├── alembic/
+│   ├── env.py
+│   ├── script.py.mako
+│   └── versions/
+│       └── e117fe54c208_initial_migration.py
+├── alembic.ini
+├── app/
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── document_ingestion.py
+│   │   ├── document_selection.py
+│   │   ├── question_answering.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── logging_config.py
+│   ├── main.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── db_models.py
+│   │   ├── embedding_store.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── embedding_service.py
+│   │   ├── retrieval_service.py
+│   ├── tests/
+│       ├── __init__.py
+│       ├── test_document_ingestion.py
+│       ├── test_document_selection.py
+│       ├── test_question_answering.py
+├── configs/
+├── deployment/
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+├── docs/
+│   ├── API_DOCS.md
+│   ├── README.md
+├── requirements.txt
+├── sample_data/
+│   └── sample.txt
+```
+
 ---
 
 ## **Installation Steps**
