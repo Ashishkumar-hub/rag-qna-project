@@ -21,7 +21,7 @@ class Document(Base):
     __tablename__ = "documents"
     id = Column(Integer, primary_key=True, index=True)
     text = Column(String, index=True)
-    embedding = Column(LargeBinary)  # Store embeddings as binary
+    embedding = Column(LargeBinary)
 
 
 # Database setup

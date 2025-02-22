@@ -67,13 +67,14 @@ class EmbeddingStore:
         except Exception as e:
             logger.error(f"Error adding embedding: {e}")
 
-    def search(self, query_embedding, k=5):
+    def search(self, query_embedding, k=5, threshold=0.5):
         """
         Perform a nearest neighbor search on the FAISS index.
 
         Args:
             query_embedding (np.ndarray): The query embedding vector.
             k (int, optional): The number of nearest neighbors to retrieve. Defaults to 5.
+            threshold (float, optional): Minimum similarity score to consider a valid match.
 
         Returns:
             list: A list of indices of the closest matching embeddings.
@@ -88,7 +89,16 @@ class EmbeddingStore:
             distances, indices = self.index.search(
                 np.array([query_embedding], dtype=np.float32), k
             )
-            return indices[0]
+
+            # Convert distances to similarity scores
+            similarities = 1 / (1 + distances)
+
+            # Filter out low-similarity results
+            valid_indices = [
+                idx for sim, idx in zip(similarities[0], indices[0]) if sim >= threshold
+            ]
+
+            return valid_indices
         except Exception as e:
             logger.error(f"Error searching embeddings: {e}")
             return []
