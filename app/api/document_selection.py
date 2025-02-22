@@ -6,6 +6,7 @@ from app.models.db_models import SessionLocal, Document
 from app.core.logging_config import logger
 
 router = APIRouter()
+selected_docs_store = set()
 
 
 def get_db():
@@ -46,22 +47,28 @@ async def select_documents(
 ):
     """
     Select documents from the database based on provided IDs.
-
-    - **doc_ids**: List of document IDs to fetch.
-    - **Returns**: List of selected document IDs.
+    Stores selected document IDs in memory.
     """
     try:
-        doc_ids = [int(doc_id) for doc_id in request.doc_ids]
-        selected_documents = db.query(Document).filter(Document.id.in_(doc_ids)).all()
+        if not request.doc_ids:
+            logger.warning("No document IDs provided in request.")
+            raise HTTPException(status_code=400, detail="No document IDs provided.")
 
-        if not selected_documents:
-            raise HTTPException(status_code=404, detail="Documents not found")
+        # Fetch valid documents from the database
+        valid_docs = db.query(Document).filter(Document.id.in_(request.doc_ids)).all()
+        valid_doc_ids = {doc.id for doc in valid_docs}
 
-        logger.info(f"Selected {len(selected_documents)} documents.")
-        return DocumentSelectionResponse(
-            selected_documents=[doc.id for doc in selected_documents]
-        )
+        if not valid_doc_ids:
+            logger.warning(f"No matching documents found for IDs: {request.doc_ids}")
+            raise HTTPException(status_code=404, detail="No matching documents found.")
+
+        # Store selected document IDs in memory
+        selected_docs_store.clear()
+        selected_docs_store.update(valid_doc_ids)
+
+        logger.info(f"Selected documents: {selected_docs_store}")
+        return DocumentSelectionResponse(selected_documents=list(selected_docs_store))
 
     except Exception as e:
-        logger.error(f"Error selecting documents: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Unexpected error selecting documents: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error.")
