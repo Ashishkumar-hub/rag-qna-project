@@ -4,17 +4,20 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_select_documents():
-    """
-    Test the document selection API.
-
-    Sends a POST request to the `/select_documents/` endpoint with a list of document IDs.
-    Verifies that:
-    - The response status code is either 200 (success) or 404 (documents not found).
-
-    Assertions:
-        - The API should return a 200 status code if documents are found.
-        - The API may return a 404 status code if the documents do not exist.
-    """
+def test_select_existing_documents():
+    """Test selecting documents that exist in the database."""
     response = client.post("/select_documents/", json={"doc_ids": [1, 2]})
-    assert response.status_code in [200, 404]
+    assert response.status_code == 200
+    assert "selected_documents" in response.json()
+
+
+def test_select_non_existent_documents():
+    """Test selecting documents that do not exist."""
+    response = client.post("/select_documents/", json={"doc_ids": [99999, 88888]})
+    assert response.status_code == 404  # Assuming API returns 404 for non-existent docs
+
+
+def test_select_no_documents():
+    """Test API behavior when no document IDs are provided."""
+    response = client.post("/select_documents/", json={"doc_ids": []})
+    assert response.status_code == 400  # Should fail if an empty list is invalid

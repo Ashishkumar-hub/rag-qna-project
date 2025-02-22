@@ -90,6 +90,9 @@ async def answer_question(query: Query, db: Session = Depends(get_db)):
             answer=response_text, message="Answer retrieved successfully."
         )
 
+    except HTTPException as http_ex:
+        raise http_ex  # Ensure FastAPI handles HTTPExceptions properly
+
     except Exception as e:
         # Log unexpected errors
         logger.error(f"Unexpected error in Q&A: {e}")

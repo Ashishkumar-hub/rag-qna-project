@@ -69,6 +69,9 @@ async def select_documents(
         logger.info(f"Selected documents: {selected_docs_store}")
         return DocumentSelectionResponse(selected_documents=list(selected_docs_store))
 
+    except HTTPException as http_ex:
+        raise http_ex  # Ensure FastAPI handles HTTPExceptions properly
+
     except Exception as e:
         logger.error(f"Unexpected error selecting documents: {e}")
         raise HTTPException(status_code=500, detail="Internal server error.")
