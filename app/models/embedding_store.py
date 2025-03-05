@@ -22,7 +22,9 @@ class EmbeddingStore:
             dimension (int, optional): The dimensionality of the embeddings. Defaults to 384.
         """
         self.dimension = dimension
-        self.index = faiss.IndexFlatL2(dimension)
+        self.index = faiss.IndexFlatL2(
+            dimension
+        )  # IndexFlatL2 creates a flat FAISS index for L2 (Euclidean) distance-based similarity search.
         self.load_existing_embeddings()  # Load on startup
 
     def load_existing_embeddings(self):
@@ -41,11 +43,13 @@ class EmbeddingStore:
                 logger.info("No existing embeddings found in database.")
                 return
 
+            # Convert binary embeddings to a list of NumPy arrays, then combine into a 2D NumPy array for FAISS indexing.
             embeddings = [
                 np.frombuffer(doc.embedding, dtype=np.float32) for doc in documents
             ]
             embeddings = np.array(embeddings, dtype=np.float32)
 
+            # If valid embeddings exist, they are added to the FAISS index.
             if embeddings.shape[0] > 0:
                 self.index.add(embeddings)
                 logger.info(f"✅ Loaded {len(embeddings)} embeddings into FAISS index.")
@@ -80,6 +84,7 @@ class EmbeddingStore:
             list: A list of indices of the closest matching embeddings.
         """
         try:
+            # Check total number of embeddings in FAISS.
             if self.index.ntotal == 0:
                 logger.warning(
                     "FAISS index is empty. No documents available for retrieval."
