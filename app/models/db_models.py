@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, LargeBinary, create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from app.core.config import DATABASE_URL
 from app.core.logging_config import logger
