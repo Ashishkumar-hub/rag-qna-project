@@ -67,7 +67,7 @@ async def answer_question(query: Query, db: Session = Depends(get_db)):
             logger.info("No relevant documents found for the query.")
             return AnswerResponse(
                 answer="No relevant content found.",
-                message="No relevant documents found.",
+                message=message,
             )
 
         # Extract and clean text from retrieved documents
@@ -86,9 +86,7 @@ async def answer_question(query: Query, db: Session = Depends(get_db)):
         response_text = " ".join(retrieved_texts)
         logger.info(f"Q&A executed successfully for: {query.question}")
 
-        return AnswerResponse(
-            answer=response_text, message="Answer retrieved successfully."
-        )
+        return AnswerResponse(answer=response_text, message=message)
 
     except HTTPException as http_ex:
         raise http_ex  # Ensure FastAPI handles HTTPExceptions properly
