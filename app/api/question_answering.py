@@ -1,12 +1,16 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from transformers import pipeline
 from app.models.db_models import SessionLocal
 from app.services.embedding_service import generate_embedding
 from app.services.retrieval_service import retrieve_relevant_docs
 from app.core.logging_config import logger
 
 router = APIRouter()
+
+# Load a LLM model for answer generation
+qa_pipeline = pipeline("text2text-generation", model="google/flan-t5-large")
 
 
 def get_db():
@@ -65,28 +69,38 @@ async def answer_question(query: Query, db: Session = Depends(get_db)):
         relevant_docs, message = retrieve_relevant_docs(query_embedding)
         if not relevant_docs:
             logger.info("No relevant documents found for the query.")
-            return AnswerResponse(
-                answer="No relevant content found.",
-                message=message,
-            )
+            return AnswerResponse(answer="No relevant content found.", message=message)
 
-        # Extract and clean text from retrieved documents
-        retrieved_texts = list(
+        # Extract and concatenate document texts
+        context = " ".join(
             set(doc.text.strip() for doc in relevant_docs if doc.text.strip())
         )
-
-        if not retrieved_texts:
+        if not context:
             logger.info("Retrieved documents did not contain useful information.")
             return AnswerResponse(
-                answer="No relevant content found in retrieved documents.",
+                answer="No relevant content found.",
                 message="Relevant documents did not contain useful information.",
             )
 
-        # Prepare response
-        response_text = " ".join(retrieved_texts)
+        # Improved Prompting (Removes unnecessary instructions)
+        prompt = (
+            f"Based on the given information, provide a concise answer:\n\n{context}"
+        )
+
+        # Generate answer using the language model
+        hf_response = qa_pipeline(prompt, max_length=150)
+        logger.info(f"Response from Hugging Face: {hf_response}")
+        generated_answer = hf_response[0]["generated_text"].strip()
+
+        if not generated_answer:
+            logger.info("Failed to generate answer for the query.")
+            return AnswerResponse(
+                answer="No answer generated.", message="Failed to generate answer."
+            )
+
         logger.info(f"Q&A executed successfully for: {query.question}")
 
-        return AnswerResponse(answer=response_text, message=message)
+        return AnswerResponse(answer=generated_answer, message=message)
 
     except HTTPException as http_ex:
         raise http_ex  # Ensure FastAPI handles HTTPExceptions properly
