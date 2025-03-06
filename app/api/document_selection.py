@@ -75,3 +75,17 @@ async def select_documents(
     except Exception as e:
         logger.error(f"Unexpected error selecting documents: {e}")
         raise HTTPException(status_code=500, detail="Internal server error.")
+
+
+@router.post(
+    "/clear_selected_documents/",
+    response_model=DocumentSelectionResponse,
+    summary="Clear selected documents",
+)
+async def clear_documents():
+    """
+    Clear selected documents from memory.
+    """
+    selected_docs_store.clear()
+    logger.info("Cleared selected documents.")
+    return DocumentSelectionResponse(selected_documents=[])
